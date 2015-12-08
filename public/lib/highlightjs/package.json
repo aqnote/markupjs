@@ -1,0 +1,57 @@
+{
+  "_args": [
+    [
+      "highlightjs@8.7.0",
+      "/Users/madding/workspace/github/nodejs/Raneto"
+    ]
+  ],
+  "_from": "highlightjs@8.7.0",
+  "_id": "highlightjs@8.7.0",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/highlightjs",
+  "_nodeVersion": "0.12.2",
+  "_npmUser": {
+    "email": "paul.sellars@rightster.com",
+    "name": "thepauleh"
+  },
+  "_npmVersion": "2.7.5",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "highlightjs",
+    "raw": "highlightjs@8.7.0",
+    "rawSpec": "8.7.0",
+    "scope": null,
+    "spec": "8.7.0",
+    "type": "version"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/highlightjs/-/highlightjs-8.7.0.tgz",
+  "_shasum": "13397cd8dd8ad7d4cfe77adffb8088a10ee3b708",
+  "_shrinkwrap": null,
+  "_spec": "highlightjs@8.7.0",
+  "_where": "/Users/madding/workspace/github/nodejs/Raneto",
+  "dependencies": {},
+  "description": "Syntax highlighting for the Web",
+  "devDependencies": {},
+  "directories": {},
+  "dist": {
+    "shasum": "13397cd8dd8ad7d4cfe77adffb8088a10ee3b708",
+    "tarball": "http://registry.npmjs.org/highlightjs/-/highlightjs-8.7.0.tgz"
+  },
+  "gitHead": "519ed08a571ce1c2290d855d08c38c9a1dbf438a",
+  "maintainers": [
+    {
+      "name": "thepauleh",
+      "email": "paul.sellars@rightster.com"
+    }
+  ],
+  "name": "highlightjs",
+  "optionalDependencies": {},
+  "private": false,
+  "readme": "ERROR: No README data found!",
+  "scripts": {},
+  "version": "8.7.0"
+}
