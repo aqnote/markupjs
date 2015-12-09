@@ -5,7 +5,7 @@
 module.exports = {
 
   // Your site title (format: page_title - site_title)
-  site_title: 'Markup System',
+  site_title: '御道(玉)',
 
   // The base URL of your site (can use %base_url% in Markdown files)
   base_url: '',
@@ -14,7 +14,7 @@ module.exports = {
   support_email: '',
 
   // Footer Text / Copyright
-  copyright: 'Copyright &copy; '+ new Date().getFullYear() +' - <a href="http://github.com/imadding/nodejs-markup">Powered by Yudao</a>',
+  copyright: 'Copyright &copy; '+ new Date().getFullYear() +' - <a href="http://aqnote.com/author">Powered by Yudao</a>',
 
   // Excerpt length (used in search)
   excerpt_length: 400,

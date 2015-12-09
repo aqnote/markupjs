@@ -22,8 +22,8 @@
   ],
   "main": "./app",
   "scripts": {
-    "start": "DEBUG=markup node example/server.js",
-    "start_win": "set DEBUG=markup&&node example/server.js",
+    "start": "DEBUG=markup node app/server.js",
+    "start_win": "set DEBUG=markup&&node app/server.js",
     "postinstall": "npm update && npm run gulp",
     "gulp": "gulp"
   },

@@ -57,7 +57,7 @@ function initialize (config) {
   // Online Editor Routes，在线编辑
   if (config.allow_editing === true) {
 
-    app.post('/rn-edit', function (req, res, next) {
+    app.post('/md-edit', function (req, res, next) {
       var filePath = path.normalize(markup.config.content_dir + req.body.file);
       if (!fs.existsSync(filePath)) { filePath += '.md'; }
       fs.writeFile(filePath, req.body.content, function (err) {
@@ -75,7 +75,7 @@ function initialize (config) {
       });
     });
 
-    app.post('/rn-delete', function (req, res, next) {
+    app.post('/md-delete', function (req, res, next) {
       var filePath = path.normalize(markup.config.content_dir + req.body.file);
       if (!fs.existsSync(filePath)) { filePath += '.md'; }
       fs.rename(filePath, filePath + '.del', function (err) {
@@ -93,7 +93,7 @@ function initialize (config) {
       });
     });
 
-    app.post('/rn-add-category', function (req, res, next) {
+    app.post('/md-add-category', function (req, res, next) {
       var filePath = path.normalize(markup.config.content_dir + req.body.category);
       fs.mkdir(filePath, function (err) {
         if (err) {
@@ -110,7 +110,7 @@ function initialize (config) {
       });
     });
 
-    app.post('/rn-add-page', function (req, res, next) {
+    app.post('/md-add-page', function (req, res, next) {
       var filePath = path.normalize(markup.config.content_dir + (!!req.body.category ? req.body.category + '/' : '') + req.body.name + '.md');
       fs.open(filePath, 'a', function (err, fd) {
         fs.close(fd);

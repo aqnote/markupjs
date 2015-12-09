@@ -10,12 +10,12 @@ console.log(debug);
 // When you are in your own project repository,
 // Raneto would be installed via NPM and loaded as:
 // var raneto = require('raneto');
-var markup = require('../app/index.js');
+var markup = require('./index.js');
 
 // Then, we load our configuration file
 // This can be done inline, with a JSON file,
 // or with a Node.js module as we do below.
-var config = require('./config.default.js');
+var config = require('./config.js');
 
 // Finally, we initialize Raneto
 // with our configuration object

@@ -1,14 +1,14 @@
-var path = require('path'),
-	fs = require('fs'),
-	glob = require('glob'),
-	_ = require('underscore'),
-	_s = require('underscore.string'),
-	moment = require('moment'),
-	marked = require('marked'),
-	lunr = require('lunr'),
-	validator = require('validator');
+var path 				= require('path');
+var	fs 					= require('fs');
+var glob 				= require('glob');
+var	_ 					= require('underscore');
+var _s 					= require('underscore.string');
+var moment 			= require('moment');
+var marked 			= require('marked');
+var lunr 				= require('lunr');
+var validator 	= require('validator');
 
-var raneto = {
+var markup = {
 
 	// Config array that can be overridden
 	config: {
@@ -52,7 +52,7 @@ var raneto = {
 
 	// Get meta information from Markdown content
 	processMeta: function(markdownContent) {
-		var metaArr = markdownContent.match(raneto._metaRegex),
+		var metaArr = markdownContent.match(markup._metaRegex),
 			meta = {};
 
 		var metaString = metaArr ? metaArr[1].trim() : '';
@@ -61,7 +61,7 @@ var raneto = {
 			metas.forEach(function(item){
 				var parts = item.split(': ');
 				if(parts[0] && parts[1]){
-					meta[raneto.cleanString(parts[0], true)] = parts[1].trim();
+					meta[markup.cleanString(parts[0], true)] = parts[1].trim();
 				}
 			});
 		}
@@ -71,13 +71,13 @@ var raneto = {
 
 	// Strip meta from Markdown content
 	stripMeta: function(markdownContent) {
-		return markdownContent.replace(raneto._metaRegex, '').trim();
+		return markdownContent.replace(markup._metaRegex, '').trim();
 	},
 
 	// Replace content variables in Markdown content
 	processVars: function(markdownContent) {
-		if(typeof raneto.config.base_url !== 'undefined') markdownContent = markdownContent.replace(/\%base_url\%/g, raneto.config.base_url);
-		if (typeof raneto.config.image_url !== 'undefined') markdownContent = markdownContent.replace(/\%image_url\%/g, raneto.config.image_url);
+		if(typeof markup.config.base_url !== 'undefined') markdownContent = markdownContent.replace(/\%base_url\%/g, markup.config.base_url);
+		if (typeof markup.config.image_url !== 'undefined') markdownContent = markdownContent.replace(/\%image_url\%/g, markup.config.image_url);
 		return markdownContent;
 	},
 
@@ -85,27 +85,27 @@ var raneto = {
 	getPage: function(filePath) {
 		try {
 			var file = fs.readFileSync(filePath),
-				slug = filePath.replace(raneto.config.content_dir, '').trim();
+				slug = filePath.replace(markup.config.content_dir, '').trim();
 
 			if(slug.indexOf('index.md') > -1){
 				slug = slug.replace('index.md', '');
 			}
 			slug = slug.replace('.md', '').trim();
 
-			var meta = raneto.processMeta(file.toString('utf-8')),
-				content = raneto.stripMeta(file.toString('utf-8'));
-			content = raneto.processVars(content);
+			var meta = markup.processMeta(file.toString('utf-8')),
+				content = markup.stripMeta(file.toString('utf-8'));
+			content = markup.processVars(content);
 			var html = marked(content);
 
 			return {
 				'slug': slug,
-				'title': meta.title ? meta.title : raneto.slugToTitle(slug),
+				'title': meta.title ? meta.title : markup.slugToTitle(slug),
 				'body': html,
-				'excerpt': _s.prune(_s.stripTags(_s.unescapeHTML(html)), (raneto.config.excerpt_length || 400))
+				'excerpt': _s.prune(_s.stripTags(_s.unescapeHTML(html)), (markup.config.excerpt_length || 400))
 			};
 		}
 		catch(e){
-			if(raneto.config.debug) console.log(e);
+			if(markup.config.debug) console.log(e);
 			return null;
 		}
 	},
@@ -113,9 +113,9 @@ var raneto = {
 	// Get a structured array of the contents of contentDir
 	getPages: function(activePageSlug) {
 		activePageSlug = activePageSlug || '';
-		var page_sort_meta = raneto.config.page_sort_meta || '',
-			category_sort = raneto.config.category_sort || false,
-			files = glob.sync(raneto.config.content_dir +'**/*'),
+		var page_sort_meta = markup.config.page_sort_meta || '',
+			category_sort = markup.config.category_sort || false,
+			files = glob.sync(markup.config.content_dir +'**/*'),
 			filesProcessed = [];
 
 		filesProcessed.push({
@@ -128,7 +128,7 @@ var raneto = {
 		});
 
 		files.forEach(function(filePath){
-            var shortPath = filePath.replace(raneto.config.content_dir, '').trim(),
+            var shortPath = filePath.replace(markup.config.content_dir, '').trim(),
 				stat = fs.lstatSync(filePath);
 
 			if(stat.isSymbolicLink()) {
@@ -139,18 +139,18 @@ var raneto = {
 				var sort = 0;
 
 				//ignore directories that has an ignore file under it
-				var ignoreFile = raneto.config.content_dir + shortPath +'/ignore';
+				var ignoreFile = markup.config.content_dir + shortPath +'/ignore';
 				if (fs.existsSync(ignoreFile) && fs.lstatSync(ignoreFile).isFile()) {
 					return true;
 				}
 
 				if(category_sort){
 					try {
-						var sortFile = fs.readFileSync(raneto.config.content_dir + shortPath +'/sort');
+						var sortFile = fs.readFileSync(markup.config.content_dir + shortPath +'/sort');
 						sort = parseInt(sortFile.toString('utf-8'), 10);
 					}
 					catch(e){
-						if(raneto.config.debug) console.log(e);
+						if(markup.config.debug) console.log(e);
 					}
 				}
 
@@ -158,7 +158,7 @@ var raneto = {
 					slug: shortPath,
 					title: _s.titleize(_s.humanize(path.basename(shortPath))),
 					is_index: false,
-					class: 'category-'+ raneto.cleanString(shortPath),
+					class: 'category-'+ markup.cleanString(shortPath),
 					sort: sort,
 					files: []
 				});
@@ -175,20 +175,20 @@ var raneto = {
 					slug = slug.replace('.md', '').trim();
 
 					var dir = path.dirname(shortPath),
-						meta = raneto.processMeta(file.toString('utf-8'));
+						meta = markup.processMeta(file.toString('utf-8'));
 
 					if(page_sort_meta && meta[page_sort_meta]) pageSort = parseInt(meta[page_sort_meta], 10);
 
 					var val = _.find(filesProcessed, function(item){ return item.slug == dir; });
 					val.files.push({
 						slug: slug,
-						title: meta.title ? meta.title : raneto.slugToTitle(slug),
+						title: meta.title ? meta.title : markup.slugToTitle(slug),
 						active: (activePageSlug.trim() == '/'+ slug),
 						sort: pageSort
 					});
 				}
 				catch(e){
-					if(raneto.config.debug) console.log(e);
+					if(markup.config.debug) console.log(e);
 				}
 			}
 		});
@@ -203,7 +203,7 @@ var raneto = {
 
 	// Index and search contents
 	doSearch: function(query) {
-		var files = glob.sync(raneto.config.content_dir +'**/*.md');
+		var files = glob.sync(markup.config.content_dir +'**/*.md');
 		var idx = lunr(function(){
 			this.field('title', { boost: 10 });
 			this.field('body');
@@ -211,25 +211,25 @@ var raneto = {
 
 		files.forEach(function(filePath){
 			try {
-				var shortPath = filePath.replace(raneto.config.content_dir, '').trim(),
+				var shortPath = filePath.replace(markup.config.content_dir, '').trim(),
 					file = fs.readFileSync(filePath);
 
-				var meta = raneto.processMeta(file.toString('utf-8'));
+				var meta = markup.processMeta(file.toString('utf-8'));
 				idx.add({
 					'id': shortPath,
-					'title': meta.title ? meta.title : raneto.slugToTitle(shortPath),
+					'title': meta.title ? meta.title : markup.slugToTitle(shortPath),
 					'body': file.toString('utf-8')
 				});
 			}
 			catch(e){
-				if(raneto.config.debug) console.log(e);
+				if(markup.config.debug) console.log(e);
 			}
 		});
 
 		var results = idx.search(query),
 			searchResults = [];
 		results.forEach(function(result){
-            var page = raneto.getPage(raneto.config.content_dir + result.ref);
+            var page = markup.getPage(markup.config.content_dir + result.ref);
             page.excerpt = page.excerpt.replace(new RegExp('('+ query +')', 'gim'), '<span class="search-query">$1</span>');
             searchResults.push(page);
         });
@@ -239,4 +239,4 @@ var raneto = {
 
 };
 
-module.exports = raneto;
+module.exports = markup;
