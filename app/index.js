@@ -14,13 +14,11 @@ var logger        = require('morgan');
 var cookie_parser = require('cookie-parser');
 var body_parser   = require('body-parser');
 var _s            = require('underscore.string');
-// var moment        = require('moment');
+var moment        = require('moment');
 var validator     = require('validator');
 var extend        = require('extend');
 var hogan         = require('hogan-express');
 var basic_auth    = require('basic-auth-connect');
-
-
 
 
 function initialize (config) {
@@ -29,7 +27,7 @@ function initialize (config) {
   var app = express();
 
   // Setup Port， 设置服务器监听端口
-  app.set('port', process.env.PORT || 3000);
+  app.set('port', process.env.PORT || 8080);
 
   // Setup Views，如果没设置采用默认模版
   if (!config.theme_dir)  { config.theme_dir  = path.join(__dirname, '..', 'themes'); }
