@@ -1,7 +1,7 @@
 
 <div class="row">
   {{^is_mobile_agent}}
-  <div class="col col-sm-3 col-md-3">
+  <div class="col-sm-3 col-md-3">
     <ul class="menu">
       {{#config.allow_editing}}
         <li><input id="newCategory" type="text" class="form-control" placeholder="Add Category"/></li>
@@ -24,7 +24,7 @@
     </ul>
   </div>
   {{/is_mobile_agent}}
-  <div class="col col-sm-9 col-md-9">
+  <div {{^is_mobile_agent}}class="col-sm-9 col-md-9"{{/is_mobile_agent}}>
     <section class="content">
       {{#config.allow_editing}}
         <div class="btn-group btn-group-sm pull-right">
