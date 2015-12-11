@@ -19,7 +19,7 @@ var markup_context = {
 		// Toggle debug logging
 		debug: false,
     // 用户信息
-    author_info: '<a href="mailto:webmaster@example.com">御道</a>, random: ' + new Date(),
+    author_info: '<a href="mailto:webmaster@example.com">御道</a>, ' + new Date(),
     // 广告
     ad: ''
 	}
