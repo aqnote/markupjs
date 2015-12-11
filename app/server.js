@@ -3,14 +3,14 @@
 'use strict';
 
 // Modules
-var debug = require('debug')('raneto');
+var debug = require('debug')('markup');
 console.log(debug);
 
 // Here is where we load Raneto.
 // When you are in your own project repository,
 // Raneto would be installed via NPM and loaded as:
 // var raneto = require('raneto');
-var markup = require('./index.js');
+var markup = require('./markup.js');
 
 // Then, we load our configuration file
 // This can be done inline, with a JSON file,

@@ -1,242 +1,287 @@
-var path 				= require('path');
-var	fs 					= require('fs');
-var glob 				= require('glob');
-var	_ 					= require('underscore');
-var _s 					= require('underscore.string');
-var moment 			= require('moment');
-var marked 			= require('marked');
-var lunr 				= require('lunr');
-var validator 	= require('validator');
 
-var markup = {
+'use strict';
 
-	// Config array that can be overridden
-	config: {
-		// The base URL of your site (allows you to use %base_url% in Markdown files)
-		base_url: '',
-		// The base URL of your images folder (allows you to use %image_url% in Markdown files)
-		image_url: '/images',
-		// Excerpt length (used in search)
-		excerpt_length: 400,
-		// The meta value by which to sort pages (value should be an integer)
-		// If this option is blank pages will be sorted alphabetically
-		page_sort_meta: 'sort',
-		// Should categories be sorted numerically (true) or alphabetically (false)
-		// If true category folders need to contain a "sort" file with an integer value
-		category_sort: true,
-		// Specify the path of your content folder where all your '.md' files are located
-		content_dir: './content/',
-		// Toggle debug logging
-		debug: false
-	},
+// markup系统模块
+var markup_util        = require('./markup-util.js');
+var markup_action      = require('./markup-action.js');
+var markup_context     = require('./markup-context.js');
+// markdown解析器
+var marked        = require('marked');
+// web开发相关
+var express       = require('express');
+var hogan         = require('hogan-express');
+var favicon       = require('serve-favicon');
+var cookie_parser = require('cookie-parser');
+var body_parser   = require('body-parser');
+// 文件操作相关
+var path          = require('path');
+var fs            = require('fs');
+// 日志系统
+var logger        = require('morgan');
+var _s            = require('underscore.string');
+// 日期格式化
+var moment        = require('moment');
+// 表单验证工具
+var validator     = require('validator');
+// 对象拷贝工具
+var extend        = require('extend');
 
-	// Regex for page meta
-	_metaRegex: /^\/\*([\s\S]*?)\*\//i,
+function initialize (config) {
 
-	// Makes filename safe strings
-	cleanString: function(str, use_underscore) {
-		var u = use_underscore || false;
-		str = str.replace(/\//g, ' ').trim();
-		if(u){
-			return _s.underscored(str);
-		} else {
-			return _s.trim(_s.dasherize(str), '-');
-		}
-	},
+  // New Express App
+  var app = express();
 
-	// Convert a slug to a title
-	slugToTitle: function(slug) {
-		slug = slug.replace('.md', '').trim();
-		return _s.titleize(_s.humanize(path.basename(slug)));
-	},
+  // Setup Port， 设置服务器监听端口
+  app.set('port', process.env.PORT || 8080);
 
-	// Get meta information from Markdown content
-	processMeta: function(markdownContent) {
-		var metaArr = markdownContent.match(markup._metaRegex),
-			meta = {};
+  // Setup Views，如果没设置采用默认模版
+  if (!config.theme_dir)  { config.theme_dir  = path.join(__dirname, '..', 'themes'); }
+  if (!config.theme_name) { config.theme_name = 'default'; }
+  app.set('views', path.join(config.theme_dir, config.theme_name, 'templates'));
+  app.set('layout', 'layout');
+  app.set('view engine', 'html');
+  app.enable('view cache');
+  app.engine('html', hogan);
 
-		var metaString = metaArr ? metaArr[1].trim() : '';
-		if(metaString){
-			var metas = metaString.match(/(.*): (.*)/ig);
-			metas.forEach(function(item){
-				var parts = item.split(': ');
-				if(parts[0] && parts[1]){
-					meta[markup.cleanString(parts[0], true)] = parts[1].trim();
-				}
-			});
-		}
+  // Setup Express
+  app.use(favicon(config.public_dir + '/favicon.ico'));
+  app.use(logger('dev'));
+  app.use(body_parser.json());
+  app.use(body_parser.urlencoded({ extended : false }));
+  app.use(cookie_parser());
+  app.use(express.static(config.public_dir));
 
-		return meta;
-	},
+  // Setup config
+  extend(markup_context.config, config);
 
-	// Strip meta from Markdown content
-	stripMeta: function(markdownContent) {
-		return markdownContent.replace(markup._metaRegex, '').trim();
-	},
+  // Online Editor Routes，在线编辑
+  if (config.allow_editing === true) {
 
-	// Replace content variables in Markdown content
-	processVars: function(markdownContent) {
-		if(typeof markup.config.base_url !== 'undefined') markdownContent = markdownContent.replace(/\%base_url\%/g, markup.config.base_url);
-		if (typeof markup.config.image_url !== 'undefined') markdownContent = markdownContent.replace(/\%image_url\%/g, markup.config.image_url);
-		return markdownContent;
-	},
+    app.post('/md-edit', function (req, res, next) {
+      var filePath = path.normalize(markup_context.config.content_dir + req.body.file);
+      if (!fs.existsSync(filePath)) { filePath += '.md'; }
+      fs.writeFile(filePath, req.body.content, function (err) {
+        if (err) {
+          console.log(err);
+          return res.json({
+            status  : 1,
+            message : err
+          });
+        }
+        res.json({
+          status  : 0,
+          message : 'Page Saved'
+        });
+      });
+    });
 
-	// Get a page
-	getPage: function(filePath) {
-		try {
-			var file = fs.readFileSync(filePath),
-				slug = filePath.replace(markup.config.content_dir, '').trim();
+    app.post('/md-delete', function (req, res, next) {
+      var filePath = path.normalize(markup_context.config.content_dir + req.body.file);
+      if (!fs.existsSync(filePath)) { filePath += '.md'; }
+      fs.rename(filePath, filePath + '.del', function (err) {
+        if (err) {
+          console.log(err);
+          return res.json({
+            status: 1,
+            message: err
+          });
+        }
+        res.json({
+          status: 0,
+          message: 'Page Deleted'
+        });
+      });
+    });
 
-			if(slug.indexOf('index.md') > -1){
-				slug = slug.replace('index.md', '');
-			}
-			slug = slug.replace('.md', '').trim();
+    app.post('/md-add-category', function (req, res, next) {
+      var filePath = path.normalize(markup_context.config.content_dir + req.body.category);
+      fs.mkdir(filePath, function (err) {
+        if (err) {
+          console.log(err);
+          return res.json({
+            status  : 1,
+            message : err
+          });
+        }
+        res.json({
+          status  : 0,
+          message : 'Category Created'
+        });
+      });
+    });
 
-			var meta = markup.processMeta(file.toString('utf-8')),
-				content = markup.stripMeta(file.toString('utf-8'));
-			content = markup.processVars(content);
-			var html = marked(content);
+    app.post('/md-add-page', function (req, res, next) {
+      var filePath = path.normalize(markup_context.config.content_dir + (!!req.body.category ? req.body.category + '/' : '') + req.body.name + '.md');
+      fs.open(filePath, 'a', function (err, fd) {
+        fs.close(fd);
+        if (err) {
+          console.log(err);
+          return res.json({
+            status  : 1,
+            message : err
+          });
+        }
+        res.json({
+          status  : 0,
+          message : 'Page Created'
+        });
+      });
+    });
 
-			return {
-				'slug': slug,
-				'title': meta.title ? meta.title : markup.slugToTitle(slug),
-				'body': html,
-				'excerpt': _s.prune(_s.stripTags(_s.unescapeHTML(html)), (markup.config.excerpt_length || 400))
-			};
-		}
-		catch(e){
-			if(markup.config.debug) console.log(e);
-			return null;
-		}
-	},
+  }
 
-	// Get a structured array of the contents of contentDir
-	getPages: function(activePageSlug) {
-		activePageSlug = activePageSlug || '';
-		var page_sort_meta = markup.config.page_sort_meta || '',
-			category_sort = markup.config.category_sort || false,
-			files = glob.sync(markup.config.content_dir +'**/*'),
-			filesProcessed = [];
+  // Handle all requests
+  app.get('*', function (req, res, next) {
 
-		filesProcessed.push({
-			slug: '.',
-			title: '',
-			is_index: true,
-			class: 'category-index',
-			sort: 0,
-			files: []
-		});
+    var suffix = 'edit';
 
-		files.forEach(function(filePath){
-            var shortPath = filePath.replace(markup.config.content_dir, '').trim(),
-				stat = fs.lstatSync(filePath);
+    if (req.query.search) {
 
-			if(stat.isSymbolicLink()) {
-				stat = fs.lstatSync(fs.readlinkSync(filePath));
-			}
+      var searchQuery    = validator.toString(validator.escape(_s.stripTags(req.query.search))).trim();
+      var searchResults  = markup_action.doSearch(searchQuery);
+      var pageListSearch = markup_action.getPages('');
 
-			if(stat.isDirectory()){
-				var sort = 0;
+      return res.render('search', {
+        config: config,
+        pages: pageListSearch,
+        search: searchQuery,
+        searchResults: searchResults,
+        body_class: 'page-search'
+      });
 
-				//ignore directories that has an ignore file under it
-				var ignoreFile = markup.config.content_dir + shortPath +'/ignore';
-				if (fs.existsSync(ignoreFile) && fs.lstatSync(ignoreFile).isFile()) {
-					return true;
-				}
+    } else if (req.params[0]) {
 
-				if(category_sort){
-					try {
-						var sortFile = fs.readFileSync(markup.config.content_dir + shortPath +'/sort');
-						sort = parseInt(sortFile.toString('utf-8'), 10);
-					}
-					catch(e){
-						if(markup.config.debug) console.log(e);
-					}
-				}
+      var slug = req.params[0];
+      if (slug === '/') { slug = '/index'; }
 
-				filesProcessed.push({
-					slug: shortPath,
-					title: _s.titleize(_s.humanize(path.basename(shortPath))),
-					is_index: false,
-					class: 'category-'+ markup.cleanString(shortPath),
-					sort: sort,
-					files: []
-				});
-			}
-			if(stat.isFile() && path.extname(shortPath) == '.md'){
-				try {
-					var file = fs.readFileSync(filePath),
-						slug = shortPath,
-						pageSort = 0;
+      var pageList     = markup_action.getPages(slug);
+      var filePath     = path.normalize(markup_context.config.content_dir + slug);
+      var filePathOrig = filePath;
 
-					if(shortPath.indexOf('index.md') > -1){
-						slug = slug.replace('index.md', '');
-					}
-					slug = slug.replace('.md', '').trim();
+      if (filePath.indexOf(suffix, filePath.length - suffix.length) !== -1) {
+        filePath = filePath.slice(0, - suffix.length - 1);
+      }
+      if (!fs.existsSync(filePath)) { filePath += '.md'; }
 
-					var dir = path.dirname(shortPath),
-						meta = markup.processMeta(file.toString('utf-8'));
+      if (slug === '/index' && !fs.existsSync(filePath)) {
 
-					if(page_sort_meta && meta[page_sort_meta]) pageSort = parseInt(meta[page_sort_meta], 10);
-
-					var val = _.find(filesProcessed, function(item){ return item.slug == dir; });
-					val.files.push({
-						slug: slug,
-						title: meta.title ? meta.title : markup.slugToTitle(slug),
-						active: (activePageSlug.trim() == '/'+ slug),
-						sort: pageSort
-					});
-				}
-				catch(e){
-					if(markup.config.debug) console.log(e);
-				}
-			}
-		});
-
-		filesProcessed = _.sortBy(filesProcessed, function(cat){ return cat.sort; });
-		filesProcessed.forEach(function(category){
-			category.files = _.sortBy(category.files, function(file){ return file.sort; });
-		});
-
-		return filesProcessed;
-	},
-
-	// Index and search contents
-	doSearch: function(query) {
-		var files = glob.sync(markup.config.content_dir +'**/*.md');
-		var idx = lunr(function(){
-			this.field('title', { boost: 10 });
-			this.field('body');
-		});
-
-		files.forEach(function(filePath){
-			try {
-				var shortPath = filePath.replace(markup.config.content_dir, '').trim(),
-					file = fs.readFileSync(filePath);
-
-				var meta = markup.processMeta(file.toString('utf-8'));
-				idx.add({
-					'id': shortPath,
-					'title': meta.title ? meta.title : markup.slugToTitle(shortPath),
-					'body': file.toString('utf-8')
-				});
-			}
-			catch(e){
-				if(markup.config.debug) console.log(e);
-			}
-		});
-
-		var results = idx.search(query),
-			searchResults = [];
-		results.forEach(function(result){
-            var page = markup.getPage(markup.config.content_dir + result.ref);
-            page.excerpt = page.excerpt.replace(new RegExp('('+ query +')', 'gim'), '<span class="search-query">$1</span>');
-            searchResults.push(page);
+        var stat = fs.lstatSync(path.join(config.theme_dir, config.theme_name, 'templates', 'home.html'));
+        return res.render('home', {
+          config        : config,
+          pages         : pageList,
+          body_class    : 'page-home',
+          last_modified : moment(stat.mtime).format('Do MMM YYYY')
         });
 
-		return searchResults;
-	}
+      } else {
+        // 编辑
+        if (filePathOrig.indexOf(suffix, filePathOrig.length - suffix.length) !== -1) {
 
-};
+          fs.readFile(filePath, 'utf8', function (err, content) {
+            if (err) {
+              err.status = '404';
+              err.message = 'Whoops. Looks like this page doesn\'t exist.';
+              return next(err);
+            }
 
-module.exports = markup;
+            if (path.extname(filePath) === '.md') {
+
+              // File info
+              var stat = fs.lstatSync(filePath);
+              // Meta
+              var meta = markup_util.processMeta(content);
+              content = markup_util.stripMeta(content);
+              if (!meta.title) { meta.title = markup_util.slugToTitle(filePath); }
+
+              // Content
+              content      = markup_util.processVars(content);
+              var html     = content;
+              var template = meta.template || 'page';
+
+              return res.render('edit', {
+                config: config,
+                pages: pageList,
+                meta: meta,
+                content: html,
+                body_class: template + '-' + markup_util.cleanString(slug),
+                last_modified: moment(stat.mtime).format('Do MMM YYYY')
+              });
+
+            }
+          });
+
+        } else {
+          // 展示
+          fs.readFile(filePath, 'utf8', function (err, content) {
+
+            if (err) {
+              err.status = '404';
+              err.message = 'Whoops. Looks like this page doesn\'t exist.';
+              return next(err);
+            }
+
+            // Process Markdown files
+            if (path.extname(filePath) === '.md') {
+
+              // File info
+              var stat = fs.lstatSync(filePath);
+
+              // Meta
+              var meta = markup_util.processMeta(content);
+              content = markup_util.stripMeta(content);
+              if (!meta.title) { meta.title = markup_util.slugToTitle(filePath); }
+
+              // Content
+              content = markup_util.processVars(content);
+              // BEGIN: DISPLAY, NOT EDIT
+              marked.setOptions({
+                langPrefix: ''
+              });
+              var html = marked(content);
+              // END: DISPLAY, NOT EDIT
+              var template = meta.template || 'page';
+
+              return res.render(template, {
+                config: config,
+                pages: pageList,
+                meta: meta,
+                content: html,
+                body_class: template + '-' + markup_util.cleanString(slug),
+                last_modified: moment(stat.mtime).format('Do MMM YYYY')
+              });
+
+            } else {
+              // Serve static file
+              res.sendfile(filePath);
+            }
+
+          });
+
+        }
+
+      }
+
+    } else {
+      next();
+    }
+
+  });
+
+  // Error-Handling Middleware
+  app.use(function (err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      config     : config,
+      status     : err.status,
+      message    : err.message,
+      error      : {},
+      body_class : 'page-error'
+    });
+  });
+
+  return app;
+
+}
+
+// Exports
+module.exports = initialize;

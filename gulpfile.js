@@ -1,9 +1,9 @@
 var gulp = require('gulp');
 var shell = require('gulp-shell');
 
-gulp.task('default', ['copy_libs']);
+gulp.task('default', ['libsToPublic']);
 
-gulp.task('copy_libs', function() {
+gulp.task('libsToPublic', function() {
   var source = [
     'node_modules/bootstrap/**/*',
     'node_modules/fitvids/**/*',

@@ -23,7 +23,6 @@
   "main": "./app",
   "scripts": {
     "start": "DEBUG=markup node app/server.js",
-    "start_win": "set DEBUG=markup&&node app/server.js",
     "postinstall": "npm update && npm run gulp",
     "gulp": "gulp"
   },
@@ -31,7 +30,6 @@
     "node": ">=4.0.0"
   },
   "dependencies": {
-    "basic-auth-connect": "1.0.0",
     "body-parser": "1.14.1",
     "bootstrap": "3.3.5",
     "cookie-parser": "1.4.0",

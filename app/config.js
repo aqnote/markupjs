@@ -5,7 +5,7 @@
 module.exports = {
 
   // Your site title (format: page_title - site_title)
-  site_title: '御道(玉)',
+  site_title: '御道笔记',
 
   // The base URL of your site (can use %base_url% in Markdown files)
   base_url: '',
@@ -49,12 +49,5 @@ module.exports = {
 
   // Set to true to enable the web editor
   allow_editing : false,
-
-  // Set to true to enable HTTP Basic Authentication
-  authentication : false,
-  credentials    : {
-    username : 'admin',
-    password : 'hell01234'
-  }
 
 };
