@@ -55,8 +55,18 @@ var markup_util = {
 
 	// Replace content variables in Markdown content
 	processVars: function(markdownContent) {
-		if(typeof markup_context.config.base_url !== 'undefined') markdownContent = markdownContent.replace(/\%base_url\%/g, markup_context.config.base_url);
-		if (typeof markup_context.config.image_url !== 'undefined') markdownContent = markdownContent.replace(/\%image_url\%/g, markup_context.config.image_url);
+		if(typeof markup_context.config.base_url !== 'undefined') {
+			markdownContent = markdownContent.replace(/\%base_url\%/g, markup_context.config.base_url);
+		}
+		if (typeof markup_context.config.image_url !== 'undefined') {
+			markdownContent = markdownContent.replace(/\%image_url\%/g, markup_context.config.image_url);
+		}
+		if(typeof markup_context.config.author_info != 'undefined') {
+			markdownContent = markdownContent.replace(/\%author_info\%/g, markup_context.config.author_info);
+		}
+		if(typeof markup_context.config.ad != 'undefined') {
+			markdownContent = markdownContent.replace(/\%ad\%/g, markup_context.config.ad);
+		}
 		return markdownContent;
 	}
 

@@ -134,7 +134,7 @@ function initialize (config) {
   app.get('*', function (req, res, next) {
 
     var suffix = 'edit';
-
+    console.log("req.params[0]: " + req.params[0]);
     if (req.query.search) {
 
       var searchQuery    = validator.toString(validator.escape(_s.stripTags(req.query.search))).trim();
@@ -153,6 +153,8 @@ function initialize (config) {
 
       var slug = req.params[0];
       if (slug === '/') { slug = '/index'; }
+      // add sub dir index
+      if (slug[slug.length - 1] == '/') { slug = slug + 'index'; };
 
       var pageList     = markup_action.getPages(slug);
       var filePath     = path.normalize(markup_context.config.content_dir + slug);
@@ -226,12 +228,12 @@ function initialize (config) {
               // File info
               var stat = fs.lstatSync(filePath);
 
-              // Meta
+              // Meta，处理meta信息
               var meta = markup_util.processMeta(content);
-              content = markup_util.stripMeta(content);
               if (!meta.title) { meta.title = markup_util.slugToTitle(filePath); }
 
               // Content
+              content = markup_util.stripMeta(content);
               content = markup_util.processVars(content);
               // BEGIN: DISPLAY, NOT EDIT
               marked.setOptions({
@@ -242,12 +244,12 @@ function initialize (config) {
               var template = meta.template || 'page';
 
               return res.render(template, {
-                config: config,
-                pages: pageList,
-                meta: meta,
-                content: html,
-                body_class: template + '-' + markup_util.cleanString(slug),
-                last_modified: moment(stat.mtime).format('Do MMM YYYY')
+                config        : config,
+                pages         : pageList,
+                meta          : meta,
+                content       : html,
+                body_class    : template + '-' + markup_util.cleanString(slug),
+                last_modified : moment(stat.mtime).format('Do MMM YYYY')
               });
 
             } else {

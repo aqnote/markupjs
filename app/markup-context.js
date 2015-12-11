@@ -17,7 +17,11 @@ var markup_context = {
 		// Specify the path of your content folder where all your '.md' files are located
 		content_dir: './content/',
 		// Toggle debug logging
-		debug: false
+		debug: false,
+    // 用户信息
+    author_info: '<a href="mailto:webmaster@example.com">御道</a>, random: ' + new Date(),
+    // 广告
+    ad: ''
 	}
 };
 
