@@ -1,7 +1,7 @@
 
 <div class="row">
-  <div class="col-sm-3">
-
+  {{^is_mobile_agent}}
+  <div class="col col-sm-3 col-md-3">
     <ul class="menu">
       {{#config.allow_editing}}
         <li><input id="newCategory" type="text" class="form-control" placeholder="Add Category"/></li>
@@ -22,12 +22,10 @@
         </li>
       {{/pages}}
     </ul>
-
   </div>
-  <div class="col-sm-9">
-
+  {{/is_mobile_agent}}
+  <div class="col col-sm-9 col-md-9">
     <section class="content">
-
       {{#config.allow_editing}}
         <div class="btn-group btn-group-sm pull-right">
           <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
@@ -54,8 +52,6 @@
           Last updated on {{last_modified}}
         </div>
       </div>
-
     </section>
-
   </div>
 </div>

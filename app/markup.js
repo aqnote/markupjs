@@ -241,6 +241,10 @@ function initialize (config) {
                 langPrefix: ''
               });
               var html = marked(content);
+
+              var deviceAgent = req.headers["user-agent"].toLowerCase();
+              var isMobileAgent = deviceAgent.match(/(iphone|ipod|ipad|android)/);
+
               // END: DISPLAY, NOT EDIT
               var template = meta.template || 'page';
 
@@ -250,7 +254,8 @@ function initialize (config) {
                 meta          : meta,
                 content       : html,
                 body_class    : template + '-' + markup_util.cleanString(slug),
-                last_modified : moment(stat.mtime).format('Do MMM YYYY')
+                last_modified : moment(stat.mtime).format('Do MMM YYYY'),
+                is_mobile_agent : isMobileAgent
               });
 
             } else {
