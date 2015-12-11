@@ -138,6 +138,7 @@ function initialize (config) {
     if (req.query.search) {
 
       var searchQuery    = validator.toString(validator.escape(_s.stripTags(req.query.search))).trim();
+      console.log('search query: ' + searchQuery);
       var searchResults  = markup_action.doSearch(searchQuery);
       var pageListSearch = markup_action.getPages('');
 

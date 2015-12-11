@@ -145,6 +145,11 @@ var markup_action = {
 					file = fs.readFileSync(filePath);
 
 				var meta = markup_util.processMeta(file.toString('utf-8'));
+				// console.log("====================");
+				// console.log("id: " + shortPath);
+				// console.log("meta title: " + meta.title);
+				// console.log("body: " + file.toString('utf-8'));
+				// console.log("====================");
 				idx.add({
 					'id': shortPath,
 					'title': meta.title ? meta.title : markup_util.slugToTitle(shortPath),
@@ -159,7 +164,7 @@ var markup_action = {
 		var results = idx.search(query),
 			searchResults = [];
 		results.forEach(function(result){
-            var page = markup_util.getPage(markup_context.config.content_dir + result.ref);
+            var page = markup_action.getPage(markup_context.config.content_dir + result.ref);
             page.excerpt = page.excerpt.replace(new RegExp('('+ query +')', 'gim'), '<span class="search-query">$1</span>');
             searchResults.push(page);
         });
