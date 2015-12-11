@@ -14,7 +14,7 @@ module.exports = {
   support_email: '',
 
   // Footer Text / Copyright
-  copyright: 'Copyright &copy; '+ new Date().getFullYear() +' - <a href="http://aqnote.com/author">Powered by Yudao</a>',
+  copyright: 'Copyright &copy; '+ new Date().getFullYear() +' - <a href="http://aqnote.com/author">Powered by 御道（YUDAO）</a>',
 
   // Excerpt length (used in search)
   excerpt_length: 400,
