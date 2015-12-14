@@ -32,7 +32,7 @@ var markup_util = {
 	 */
 	processMeta: function(markdownContent) {
 		var metaArr = markdownContent.match(markup_util._metaRegex),
-		meta = {};
+			meta = {};
 
 		var metaString = metaArr ? metaArr[1].trim() : '';
 		if(metaString){

@@ -52,68 +52,52 @@ var markup_action = {
 			slug: '.',
 			title: '',
 			is_index: true,
+			class: 'category-index',
 			sort: 0,
 			files: []
 		});
 
 		files.forEach(function(filePath){
-      var shortPath = filePath.replace(markup_context.config.content_dir, '').trim();
-			var statInfo = fs.lstatSync(filePath);
+            var shortPath = filePath.replace(markup_context.config.content_dir, '').trim(),
+				stat = fs.lstatSync(filePath);
 
-			if(statInfo.isSymbolicLink()) {
-				statInfo = fs.lstatSync(fs.readlinkSync(filePath));
+			if(stat.isSymbolicLink()) {
+				stat = fs.lstatSync(fs.readlinkSync(filePath));
 			}
 
-			// 处理目录
-			if(statInfo.isDirectory()) {
+			if(stat.isDirectory()){
+				var sort = 0;
 
-				var sort = 10;
-				var metaFile = markup_context.config.content_dir + shortPath +'/meta';
-				if (fs.existsSync(metaFile) && fs.lstatSync(metaFile).isFile()) {
-					fs.readFile(metaFile, 'utf8', function (err, content) {
-	          if (err) {
-	            err.status = '404';
-	            err.message = 'Sytem error. meta';
-	            return next(err);
-	          }
-
-						var metaInfo = markup_util.processMeta(content);
-						if((typeof metaInfo.ignore !== 'undefined') && "true".match(metaInfo.ignore)) {
-							return;
-						}
-
-						if(category_sort){
-							try {
-								sort = parseInt(metaInfo.sort, 10);
-							} catch(e){
-								if(markup_context.config.debug) console.log(e);
-							}
-						}
-						console.log(shortPath + ' ' + metaInfo.ignore);
-						filesProcessed.push({
-							slug: shortPath,
-							title: _s.titleize(_s.humanize(path.basename(shortPath))),
-							is_index: false,
-							sort: sort,
-							files: []
-						});
-					});
-				} else {
-					filesProcessed.push({
-						slug: shortPath,
-						title: _s.titleize(_s.humanize(path.basename(shortPath))),
-						is_index: false,
-						sort: sort,
-						files: []
-					});
+				//ignore directories that has an ignore file under it
+				var ignoreFile = markup_context.config.content_dir + shortPath +'/ignore';
+				if (fs.existsSync(ignoreFile) && fs.lstatSync(ignoreFile).isFile()) {
+					return true;
 				}
-			}
 
-			if(statInfo.isFile() && path.extname(shortPath) == '.md'){
+				if(category_sort){
+					try {
+						var sortFile = fs.readFileSync(markup_context.config.content_dir + shortPath +'/sort');
+						sort = parseInt(sortFile.toString('utf-8'), 10);
+					}
+					catch(e){
+						if(markup_context.config.debug) console.log(e);
+					}
+				}
+
+				filesProcessed.push({
+					slug: shortPath,
+					title: _s.titleize(_s.humanize(path.basename(shortPath))),
+					is_index: false,
+					class: 'category-'+ markup_util.cleanString(shortPath),
+					sort: sort,
+					files: []
+				});
+			}
+			if(stat.isFile() && path.extname(shortPath) == '.md'){
 				try {
-					var file = fs.readFileSync(filePath);
-					var slug = shortPath;
-					var pageSort = 0;
+					var file = fs.readFileSync(filePath),
+						slug = shortPath,
+						pageSort = 0;
 
 					if(shortPath.indexOf('index.md') > -1){
 						slug = slug.replace('index.md', '');
@@ -121,7 +105,7 @@ var markup_action = {
 					slug = slug.replace('.md', '').trim();
 
 					var dir = path.dirname(shortPath),
-					meta = markup_util.processMeta(file.toString('utf-8'));
+						meta = markup_util.processMeta(file.toString('utf-8'));
 
 					if(page_sort_meta && meta[page_sort_meta]) pageSort = parseInt(meta[page_sort_meta], 10);
 
@@ -132,7 +116,8 @@ var markup_action = {
 						active: (activePageSlug.trim() == '/'+ slug),
 						sort: pageSort
 					});
-				}	catch(e){
+				}
+				catch(e){
 					if(markup_context.config.debug) console.log(e);
 				}
 			}
