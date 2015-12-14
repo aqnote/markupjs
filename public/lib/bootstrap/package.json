@@ -2,7 +2,7 @@
   "_args": [
     [
       "bootstrap@3.3.5",
-      "/Users/madding/workspace/github/nodejs/Raneto"
+      "/Users/madding/workspace/github/imadding/markupjs"
     ]
   ],
   "_from": "bootstrap@3.3.5",
@@ -31,7 +31,7 @@
   "_shasum": "1777ab79299b128d87dce7cbd86fdc46ac69c0b1",
   "_shrinkwrap": null,
   "_spec": "bootstrap@3.3.5",
-  "_where": "/Users/madding/workspace/github/nodejs/Raneto",
+  "_where": "/Users/madding/workspace/github/imadding/markupjs",
   "author": {
     "name": "Twitter, Inc."
   },

@@ -2,7 +2,7 @@
   "_args": [
     [
       "fitvids@1.0.2",
-      "/Users/madding/workspace/github/nodejs/Raneto"
+      "/Users/madding/workspace/github/imadding/markupjs"
     ]
   ],
   "_from": "fitvids@1.0.2",
@@ -32,7 +32,7 @@
   "_shasum": "5b53034f3b9c5c8bad14ab6475892c54ed0886ca",
   "_shrinkwrap": null,
   "_spec": "fitvids@1.0.2",
-  "_where": "/Users/madding/workspace/github/nodejs/Raneto",
+  "_where": "/Users/madding/workspace/github/imadding/markupjs",
   "author": {
     "email": "ross@rosszurowski.com",
     "name": "Ross Zurowski"

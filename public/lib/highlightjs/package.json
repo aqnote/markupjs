@@ -2,7 +2,7 @@
   "_args": [
     [
       "highlightjs@8.7.0",
-      "/Users/madding/workspace/github/nodejs/Raneto"
+      "/Users/madding/workspace/github/imadding/markupjs"
     ]
   ],
   "_from": "highlightjs@8.7.0",
@@ -32,7 +32,7 @@
   "_shasum": "13397cd8dd8ad7d4cfe77adffb8088a10ee3b708",
   "_shrinkwrap": null,
   "_spec": "highlightjs@8.7.0",
-  "_where": "/Users/madding/workspace/github/nodejs/Raneto",
+  "_where": "/Users/madding/workspace/github/imadding/markupjs",
   "dependencies": {},
   "description": "Syntax highlighting for the Web",
   "devDependencies": {},

@@ -2,7 +2,7 @@
   "_args": [
     [
       "masonry-layout@3.3.2",
-      "/Users/madding/workspace/github/nodejs/Raneto"
+      "/Users/madding/workspace/github/imadding/markupjs"
     ]
   ],
   "_from": "masonry-layout@3.3.2",
@@ -32,7 +32,7 @@
   "_shasum": "b90c0c0a509a5ed2a806bbc8a8112890a76341ba",
   "_shrinkwrap": null,
   "_spec": "masonry-layout@3.3.2",
-  "_where": "/Users/madding/workspace/github/nodejs/Raneto",
+  "_where": "/Users/madding/workspace/github/imadding/markupjs",
   "author": {
     "name": "David DeSandro"
   },
