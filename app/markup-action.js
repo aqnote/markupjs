@@ -57,8 +57,8 @@ var markup_action = {
 		});
 
 		files.forEach(function(filePath){
-        var shortPath = filePath.replace(markup_context.config.content_dir, '').trim(),
-				statInfo = fs.lstatSync(filePath);
+      var shortPath = filePath.replace(markup_context.config.content_dir, '').trim();
+			var statInfo = fs.lstatSync(filePath);
 
 			if(statInfo.isSymbolicLink()) {
 				statInfo = fs.lstatSync(fs.readlinkSync(filePath));
@@ -69,7 +69,6 @@ var markup_action = {
 
 				var sort = 10;
 				var metaFile = markup_context.config.content_dir + shortPath +'/meta';
-				metaInfo = {};
 				if (fs.existsSync(metaFile) && fs.lstatSync(metaFile).isFile()) {
 					fs.readFile(metaFile, 'utf8', function (err, content) {
 	          if (err) {
@@ -78,29 +77,36 @@ var markup_action = {
 	            return next(err);
 	          }
 
-						metaInfo = markup_util.processMeta(content);
-					});
-
-					if("true".match(metaInfo.ignore)) {
-						return ;
-					}
-
-					if(category_sort){
-						try {
-							sort = parseInt(metaInfo.sort, 10);
-						} catch(e){
-							if(markup_context.config.debug) console.log(e);
+						var metaInfo = markup_util.processMeta(content);
+						if((typeof metaInfo.ignore !== 'undefined') && "true".match(metaInfo.ignore)) {
+							return;
 						}
-					}
-				}
 
-				filesProcessed.push({
-					slug: shortPath,
-					title: _s.titleize(_s.humanize(path.basename(shortPath))),
-					is_index: false,
-					sort: sort,
-					files: []
-				});
+						if(category_sort){
+							try {
+								sort = parseInt(metaInfo.sort, 10);
+							} catch(e){
+								if(markup_context.config.debug) console.log(e);
+							}
+						}
+						console.log(shortPath + ' ' + metaInfo.ignore);
+						filesProcessed.push({
+							slug: shortPath,
+							title: _s.titleize(_s.humanize(path.basename(shortPath))),
+							is_index: false,
+							sort: sort,
+							files: []
+						});
+					});
+				} else {
+					filesProcessed.push({
+						slug: shortPath,
+						title: _s.titleize(_s.humanize(path.basename(shortPath))),
+						is_index: false,
+						sort: sort,
+						files: []
+					});
+				}
 			}
 
 			if(statInfo.isFile() && path.extname(shortPath) == '.md'){
