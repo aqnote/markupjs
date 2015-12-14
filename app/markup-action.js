@@ -52,7 +52,6 @@ var markup_action = {
 			slug: '.',
 			title: '',
 			is_index: true,
-			class: 'category-index',
 			sort: 0,
 			files: []
 		});
@@ -99,7 +98,6 @@ var markup_action = {
 					slug: shortPath,
 					title: _s.titleize(_s.humanize(path.basename(shortPath))),
 					is_index: false,
-					class: 'category-'+ markup_util.cleanString(shortPath),
 					sort: sort,
 					files: []
 				});
