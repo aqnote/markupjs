@@ -19,7 +19,7 @@ var markup_context = {
 		// Toggle debug logging
 		debug: false,
     // 用户信息
-    copyright: '<a href="http://aqnote.com/author">Powered by 御道(YUDAO)</a> <a href="mailto:webmaster@example.com">邮箱</a>',
+    copyright: '<a href="http://aqnote.com/author">Powered by 御道(YUDAO)</a> <a href="mailto:madding.lip@gmail.com">邮箱</a>',
     // 广告
     ad: ''
 	}

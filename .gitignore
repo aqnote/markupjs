@@ -38,7 +38,7 @@ node_modules
 .lock-wscript
 
 ## project
-content
-public/images
+# content
+# public/images
 rsync.sh
 

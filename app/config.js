@@ -45,9 +45,6 @@ module.exports = {
   image_url: '/images',
 
   // Add your analytics tracking code (including script tags)
-  analytics: '',
-
-  // Set to true to enable the web editor
-  allow_editing : false,
+  analytics: ''
 
 };
