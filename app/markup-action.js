@@ -93,6 +93,7 @@ var markup_action = {
 					files: []
 				});
 			}
+
 			if(stat.isFile() && path.extname(shortPath) == '.md'){
 				try {
 					var file = fs.readFileSync(filePath),
@@ -123,12 +124,19 @@ var markup_action = {
 			}
 		});
 
-		filesProcessed = _.sortBy(filesProcessed, function(cat){ return cat.sort; });
+		filesProcessed = _.sortBy(filesProcessed, function(item){ return item.sort; });
 		filesProcessed.forEach(function(category){
-			category.files = _.sortBy(category.files, function(file){ return file.sort; });
+			category.files = _.sortBy(category.files, function(item){ return item.sort; });
 		});
 
-		return filesProcessed;
+		var resultInfo = [];
+		var filesProcessedLength = filesProcessed.length;
+		for (var index = 0; index < filesProcessedLength; index++) {
+			if(filesProcessed[index].files.length <= 0) continue;
+			 resultInfo.push(filesProcessed[index]);
+		}
+
+		return resultInfo;
 	},
 
 	// Index and search contents
