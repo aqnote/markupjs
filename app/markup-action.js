@@ -58,70 +58,64 @@ var markup_action = {
 		});
 
 		files.forEach(function(filePath){
-            var shortPath = filePath.replace(markup_context.config.content_dir, '').trim(),
+      	var shortPath = filePath.replace(markup_context.config.content_dir, '').trim(),
 				stat = fs.lstatSync(filePath);
 
-			if(stat.isSymbolicLink()) {
-				stat = fs.lstatSync(fs.readlinkSync(filePath));
-			}
-
-			if(stat.isDirectory()){
-				var sort = 0;
-
-				//ignore directories that has an ignore file under it
-				var ignoreFile = markup_context.config.content_dir + shortPath +'/ignore';
-				if (fs.existsSync(ignoreFile) && fs.lstatSync(ignoreFile).isFile()) {
-					return true;
+				if(stat.isSymbolicLink()) {
+					stat = fs.lstatSync(fs.readlinkSync(filePath));
 				}
 
-				if(category_sort){
+				if(stat.isDirectory()){
+					var sort = 0;
+
+					if(category_sort){
+						try {
+							var sortFile = fs.readFileSync(markup_context.config.content_dir + shortPath +'/sort');
+							sort = parseInt(sortFile.toString('utf-8'), 10);
+						}
+						catch(e){
+							if(markup_context.config.debug) console.log(e);
+						}
+					}
+
+					filesProcessed.push({
+						slug: shortPath,
+						title: _s.titleize(_s.humanize(path.basename(shortPath))),
+						is_index: false,
+						class: 'category-'+ markup_util.cleanString(shortPath),
+						sort: sort,
+						files: []
+					});
+				}
+
+				if(stat.isFile() && path.extname(shortPath) == '.md'){
 					try {
-						var sortFile = fs.readFileSync(markup_context.config.content_dir + shortPath +'/sort');
-						sort = parseInt(sortFile.toString('utf-8'), 10);
+						var file = fs.readFileSync(filePath),
+							slug = shortPath,
+							pageSort = 0;
+
+						if(shortPath.indexOf('index.md') > -1){
+							slug = slug.replace('index.md', '');
+						}
+						slug = slug.replace('.md', '').trim();
+
+						var dir = path.dirname(shortPath),
+							meta = markup_util.processMeta(file.toString('utf-8'));
+
+						if(page_sort_meta && meta[page_sort_meta]) pageSort = parseInt(meta[page_sort_meta], 10);
+
+						var val = _.find(filesProcessed, function(item){ return item.slug == dir; });
+						val.files.push({
+							slug: slug,
+							title: meta.title ? meta.title : markup_util.slugToTitle(slug),
+							active: (activePageSlug.trim() == '/'+ slug),
+							sort: pageSort
+						});
 					}
 					catch(e){
 						if(markup_context.config.debug) console.log(e);
 					}
 				}
-
-				filesProcessed.push({
-					slug: shortPath,
-					title: _s.titleize(_s.humanize(path.basename(shortPath))),
-					is_index: false,
-					class: 'category-'+ markup_util.cleanString(shortPath),
-					sort: sort,
-					files: []
-				});
-			}
-
-			if(stat.isFile() && path.extname(shortPath) == '.md'){
-				try {
-					var file = fs.readFileSync(filePath),
-						slug = shortPath,
-						pageSort = 0;
-
-					if(shortPath.indexOf('index.md') > -1){
-						slug = slug.replace('index.md', '');
-					}
-					slug = slug.replace('.md', '').trim();
-
-					var dir = path.dirname(shortPath),
-						meta = markup_util.processMeta(file.toString('utf-8'));
-
-					if(page_sort_meta && meta[page_sort_meta]) pageSort = parseInt(meta[page_sort_meta], 10);
-
-					var val = _.find(filesProcessed, function(item){ return item.slug == dir; });
-					val.files.push({
-						slug: slug,
-						title: meta.title ? meta.title : markup_util.slugToTitle(slug),
-						active: (activePageSlug.trim() == '/'+ slug),
-						sort: pageSort
-					});
-				}
-				catch(e){
-					if(markup_context.config.debug) console.log(e);
-				}
-			}
 		});
 
 		filesProcessed = _.sortBy(filesProcessed, function(item){ return item.sort; });
